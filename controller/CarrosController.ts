@@ -11,7 +11,7 @@ export const getCarros = async (ctx: Context) => {
   const { response } = ctx;
   try {
     const objCarro = new Carro();
-    const carros = await objCarro.listar();
+    const carros = await objCarro.listarCarros();
 
     response.status = 200;
     response.body = {
@@ -122,7 +122,7 @@ export const deleteCarro = async (ctx: RouterContext<"/carros/:id">) => {
       fecha: 0
     });
 
-    const result = await objCarro.eliminar();
+    const result = await objCarro.eliminarCarro();
 
     if (result.success) {
       response.status = 200;
