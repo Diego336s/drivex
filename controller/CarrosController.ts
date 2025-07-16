@@ -25,7 +25,7 @@ export const postCarros = async (ctx: Context) => {
 
     const archivo = body.get("excel") as File;
 
-    const resultado;
+    const resultado = null;
 
     if (!archivo) {
       const marca = body.get("marca") as string;
@@ -39,10 +39,13 @@ export const postCarros = async (ctx: Context) => {
       });
 
       const datos_a_enviar = {
-        ...validacion
+        ...validacion,
       };
 
-      if(resultado){        
+      const objCarro = new Carros(datos_a_enviar);
+      const resultado = await objCarro.agregarCarro();
+
+      if (resultado) {
         response.status = 200;
         response.body = {
           success: true,
@@ -50,17 +53,29 @@ export const postCarros = async (ctx: Context) => {
           data: resultado,
         };
         return;
-      }else{
-response.status = 400;
-response.body ={
-    success: false,
-    mes
-}
+      } else {
+        response.status = 400;
+        response.body = {
+          success: false,
+          message: resultado.message,
+        };
+        return;
       }
-      
-      
     }
   } catch (error) {
+    if (error instanceof z.ZodError){
+      response.status = 500;
+      response.body = {
+        success: false,
+        message: "Datos invalidos: " + error.message,
+      }
+    }else{
+      response.status = 500;
+      response.body = {
+        success: false,
+        message: "Error del servidor: " + String(error),
+      }
+    }
   }
 };
 
