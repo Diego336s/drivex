@@ -1,8 +1,10 @@
 import { Context, RouterContext, z } from "../dependencies/dependencias.ts";
+import { Carro } from '../models/CarrosModel.ts';
 
 const CarrosSchema = z.object({
   marca: z.string().min(1),
   modelo: z.string().min(1),
+  
 });
 
 export const getCarros = async (ctx: Context) => {
@@ -41,26 +43,27 @@ export const postCarros = async (ctx: Context) => {
 
     const body = await request.body.formData();
 
-    const archivo = body.get("excel") as File;
-
-    const resultado = null;
+    const archivo = body.get("excel") as File;  
 
     if (!archivo) {
       const marca = body.get("marca") as string;
       const modelo = body.get("modelo") as string;
-      const fecha = body.get("fecha") as Date | null;
+      const fecha = body.get("fecha") as string;
 
       const validacion = CarrosSchema.parse({
         marca,
         modelo,
-        fecha,
+        
+       
       });
 
       const datos_a_enviar = {
-        ...validacion,
+        id: null,
+        ...validacion,     
+        fecha: Number(fecha),  
       };
 
-      const objCarro = new Carros(datos_a_enviar);
+      const objCarro = new Carro(datos_a_enviar);
       const resultado = await objCarro.agregarCarro();
 
       if (resultado) {
@@ -75,7 +78,7 @@ export const postCarros = async (ctx: Context) => {
         response.status = 400;
         response.body = {
           success: false,
-          message: resultado.message,
+          message:"Error al agregar el carro: " + resultado,
         };
         return;
       }
