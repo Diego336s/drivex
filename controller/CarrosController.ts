@@ -4,6 +4,7 @@ import { Carro } from '../models/CarrosModel.ts';
 const CarrosSchema = z.object({
   marca: z.string().min(1),
   modelo: z.string().min(1),
+  
 });
 
 export const getCarros = async (ctx: Context) => {
@@ -29,18 +30,19 @@ export const postCarros = async (ctx: Context) => {
     if (!archivo) {
       const marca = body.get("marca") as string;
       const modelo = body.get("modelo") as string;
-      const fecha = body.get("fecha") as Date | null;
+      const fecha = body.get("fecha") as string;
 
       const validacion = CarrosSchema.parse({
         marca,
         modelo,
+        
        
       });
 
       const datos_a_enviar = {
         id: null,
-        ...validacion,
-        fecha: fecha,
+        ...validacion,     
+        fecha: Number(fecha),  
       };
 
       const objCarro = new Carro(datos_a_enviar);

@@ -4,7 +4,8 @@ interface CarroData {
   id: number | null;
   marca: string;
   modelo: string;
-  fecha: Date | null;
+  fecha: number;
+  
 }
 
 export class Carro {
