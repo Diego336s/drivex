@@ -19,7 +19,7 @@ export class Carro {
 
 public async listarCarros(): Promise<CarroData[]> {
   try {
-    const result = await Conexion.execute("SELECT * FROM carro");
+    const result = await Conexion.execute("SELECT * FROM carros");
 
     if (!result?.rows || result.rows.length === 0) {
       console.warn("No se encontraron carros en la base de datos.");
