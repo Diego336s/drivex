@@ -1,5 +1,6 @@
-import { Context, RouterContext, z } from "../dependencies/dependencias.ts";
+import { Context, RouterContext, XLSX, z } from "../dependencies/dependencias.ts";
 import { Carro } from '../models/CarrosModel.ts';
+import { CarroSubidaMasiva } from "../models/CarrosSubidaMasiva.ts";
 
 const CarrosSchema = z.object({
   marca: z.string().min(1),
@@ -83,6 +84,24 @@ export const postCarros = async (ctx: Context) => {
         return;
       }
     }
+
+    if(archivo instanceof File && archivo.name.endsWith(".xlsx")){
+      const arrayBuffer = await archivo.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, {type: "array"});
+
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+      const objCarro = new CarroSubidaMasiva(data);
+      const resultado  = await objCarro.agregarMasivamente();
+    }else{
+      response.status = 400;
+      response.body = {
+        success: false,
+        message: "El archivo debe ser un archivo Excel (.xlsx)",
+      };
+      return;
+    }
   } catch (error) {
     if (error instanceof z.ZodError){
       response.status = 500;
@@ -98,6 +117,7 @@ export const postCarros = async (ctx: Context) => {
       }
     }
   }
+
 };
 
 export const putCarros = async (ctx: Context) => {
