@@ -24,7 +24,7 @@ export const getCarros = async (ctx: Context) => {
     response.status = 500;
     response.body = {
       success: false,
-      message: "Error al obtener el Carro",
+      message: "Error al obtener el Carro: " + String(error),
     };
   }
 };
