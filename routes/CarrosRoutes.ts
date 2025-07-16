@@ -1,6 +1,6 @@
 import { Router } from "../dependencies/dependencias.ts";
 import {
-  deleteCarros,
+  deleteCarro,
   getCarros,
   postCarros,
   putCarros,
@@ -11,6 +11,6 @@ const CarrosRouter = new Router();
 CarrosRouter.get("/carros", getCarros);
 CarrosRouter.post("/carros", postCarros);
 CarrosRouter.put("/carros", putCarros);
-CarrosRouter.delete("/carros/:id", deleteCarros);
+CarrosRouter.delete("/carros/:id", deleteCarro);
 
 export { CarrosRouter };
