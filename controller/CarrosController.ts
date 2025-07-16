@@ -6,6 +6,24 @@ const CarrosSchema = z.object({
 });
 
 export const getCarros = async (ctx: Context) => {
+  const { response } = ctx;
+  try {
+    const objCarro = new Carro();
+    const carros = await objCarro.listar();
+
+    response.status = 200;
+    response.body = {
+      success: true,
+      message: "Carros encontrados exitosamente",
+      data: carros,
+    };
+  } catch (error) {
+    response.status = 500;
+    response.body = {
+      success: false,
+      message: "Error al obtener el Carro",
+    };
+  }
 };
 
 export const postCarros = async (ctx: Context) => {
@@ -82,5 +100,47 @@ export const postCarros = async (ctx: Context) => {
 export const putCarros = async (ctx: Context) => {
 };
 
-export const deleteCarros = async (ctx: RouterContext<"/carros/:id">) => {
+export const deleteCarro = async (ctx: RouterContext<"/carros/:id">) => {
+  const { response, params } = ctx;
+  try {
+    if (!params?.id) {
+      response.status = 400;
+      response.body = {
+        success: false,
+        message: "ID requerido",
+      };
+      return;
+    }
+
+    const objCarro = new Carro({
+      id: parseInt(params.id),
+      marca: "",
+    modelo: "",
+      fecha: 0
+    });
+
+    const result = await objCarro.eliminar();
+
+    if (result.success) {
+      response.status = 200;
+      response.body = {
+        success: true,
+        message: result.message,
+      };
+    } else {
+      response.status = 400;
+      response.body = {
+        success: false,
+        message: result.message,
+      };
+    }
+  } catch (error) {
+    console.error("Error al eliminar carro:", error);
+    response.status = 500;
+    response.body = {
+      success: false,
+      message: "Error interno del servidor.",
+    };
+  }
 };
+
