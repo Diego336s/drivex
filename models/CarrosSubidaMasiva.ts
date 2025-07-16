@@ -1,19 +1,15 @@
 import { Conexion } from "./Conexion.ts";
 
 export class CarroSubidaMasiva {
-    _objCarror: unknown;
+  _objCarror: unknown;
+
+  constructor(objCarror: unknown) {
+    this._objCarror = objCarror;
+  }
+  public async agregarMasivamente() {
     const CARPETA_UPLOAD = "./uploads";
-
-    constructor(objCarror: unknown){
-        this._objCarror = objCarror;
+    try {
+    } catch (error) {
     }
-    public async agregarMasivamente(){
-
-        try {
-            
-        } catch (error) {
-            
-        }
-
-    }
+  }
 }
