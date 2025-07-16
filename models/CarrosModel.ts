@@ -1,4 +1,5 @@
 
+import { promises } from "node:dns";
 import { Conexion } from "./Conexion.ts";
 interface CarroData {
   id: number | null;
@@ -14,6 +15,23 @@ export class Carro {
   constructor(objCarro: CarroData | null = null) {
     this._objCarro = objCarro;
   }
+
+
+public async listarCarros(): Promise<CarroData[]> {
+  try {
+    const result = await Conexion.execute("SELECT * FROM carro");
+
+    if (!result?.rows || result.rows.length === 0) {
+      console.warn("No se encontraron carros en la base de datos.");
+      return [];
+    }
+
+    return result.rows as CarroData[];
+  } catch (error) {
+    console.error("Error al obtener los carros:", error);
+    throw new Error("No se pudieron obtener los carros.");
+  }
+}
 
   public async agregarCarro(): Promise<{
     success: boolean;
@@ -71,6 +89,43 @@ export class Carro {
           message: "Error interno del servidor: " + String(error),
         };
       }
+    }
+  }
+    public async eliminarCarro(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      if (!this._objCarro || this._objCarro.id === null || this._objCarro.id === undefined) {
+        throw new Error("No se ha proporcionado un ID válido para eliminar el carro.");
+      }
+
+      const { id } = this._objCarro;
+
+      await Conexion.execute("START TRANSACTION");
+
+      const result = await Conexion.execute(
+        "DELETE FROM carros WHERE id = ?",
+        [id]
+      );
+
+      if (result && typeof result.affectedRows === "number" && result.affectedRows > 0) {
+        await Conexion.execute("COMMIT");
+        return {
+          success: true,
+          message: "Carro eliminado correctamente.",
+        };
+      } else {
+        throw new Error("No se pudo eliminar el carro.");
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Error interno al eliminar el carro.",
+      };
     }
   }
 }
