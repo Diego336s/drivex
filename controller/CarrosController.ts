@@ -1,11 +1,16 @@
-import { Context, RouterContext, XLSX, z } from "../dependencies/dependencias.ts";
-import { Carro } from '../models/CarrosModel.ts';
+import { error } from "node:console";
+import {
+  Context,
+  RouterContext,
+  XLSX,
+  z,
+} from "../dependencies/dependencias.ts";
+import { Carro } from "../models/CarrosModel.ts";
 import { CarroSubidaMasiva } from "../models/CarrosSubidaMasiva.ts";
 
 const CarrosSchema = z.object({
   marca: z.string().min(1),
   modelo: z.string().min(1),
-  
 });
 
 export const getCarros = async (ctx: Context) => {
@@ -44,7 +49,7 @@ export const postCarros = async (ctx: Context) => {
 
     const body = await request.body.formData();
 
-    const archivo = body.get("excel") as File;  
+    const archivo = body.get("excel") as File;
 
     if (!archivo) {
       const marca = body.get("marca") as string;
@@ -54,14 +59,12 @@ export const postCarros = async (ctx: Context) => {
       const validacion = CarrosSchema.parse({
         marca,
         modelo,
-        
-       
       });
 
       const datos_a_enviar = {
         id: null,
-        ...validacion,     
-        fecha: Number(fecha),  
+        ...validacion,
+        fecha: Number(fecha),
       };
 
       const objCarro = new Carro(datos_a_enviar);
@@ -79,22 +82,50 @@ export const postCarros = async (ctx: Context) => {
         response.status = 400;
         response.body = {
           success: false,
-          message:"Error al agregar el carro: " + resultado,
+          message: "Error al agregar el carro: " + resultado,
         };
         return;
       }
     }
 
-    if(archivo instanceof File && archivo.name.endsWith(".xlsx")){
+    if (archivo instanceof File && archivo.name.endsWith(".xlsx")) {
       const arrayBuffer = await archivo.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, {type: "array"});
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-      const objCarro = new CarroSubidaMasiva(data);
-      const resultado  = await objCarro.agregarMasivamente();
-    }else{
+      // Validación mínima del archivo
+      if (!Array.isArray(data) || data.length < 2) {
+        response.status = 400;
+        response.body = {
+          success: false,
+          message: "El archivo Excel está vacío o mal estructurado",
+        };
+        return;
+      }
+
+      // Crear instancia de CarroSubidaMasiva
+      const subida = new CarroSubidaMasiva(data as any[][]);
+      await subida.agregarMasivamente();
+
+      if(subida){
+ response.status = 200;
+      response.body = {
+        success: true,
+        message: "Carros agregados correctamente desde el archivo Excel",
+      };
+      return;
+      }else{
+        response.status = 400;
+        response.body ={
+          success: false,
+          message: "Error al agregar los carros desde el archivo Excel",
+           
+        }
+      }
+     
+    } else {
       response.status = 400;
       response.body = {
         success: false,
@@ -103,21 +134,20 @@ export const postCarros = async (ctx: Context) => {
       return;
     }
   } catch (error) {
-    if (error instanceof z.ZodError){
+    if (error instanceof z.ZodError) {
       response.status = 500;
       response.body = {
         success: false,
         message: "Datos invalidos: " + error.message,
-      }
-    }else{
+      };
+    } else {
       response.status = 500;
       response.body = {
         success: false,
         message: "Error del servidor: " + String(error),
-      }
+      };
     }
   }
-
 };
 
 export const putCarros = async (ctx: Context) => {
@@ -138,8 +168,8 @@ export const deleteCarro = async (ctx: RouterContext<"/carros/:id">) => {
     const objCarro = new Carro({
       id: parseInt(params.id),
       marca: "",
-    modelo: "",
-      fecha: 0
+      modelo: "",
+      fecha: 0,
     });
 
     const result = await objCarro.eliminarCarro();
@@ -166,4 +196,3 @@ export const deleteCarro = async (ctx: RouterContext<"/carros/:id">) => {
     };
   }
 };
-
