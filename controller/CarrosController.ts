@@ -33,6 +33,49 @@ export const getCarros = async (ctx: Context) => {
   }
 };
 
+
+export const getCarroById = async (ctx: RouterContext<"/carros/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (isNaN(id)) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      success: false,
+      message: "ID de carro inválido.",
+    };
+    return;
+  }
+
+  try {
+    const producto = new Carro();
+    const result = await producto.ObtenerCarroPorId(id);
+
+    if (!result) {
+      ctx.response.status = 404;
+      ctx.response.body = {
+        success: false,
+        message: "Carro no encontrado.",
+      };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = {
+      success: true,
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error al obtener producto por ID:", error);
+    ctx.response.status = 500;
+    ctx.response.body = {
+      success: false,
+      message: "Error interno del servidor",
+      error: String(error),
+    };
+  }
+};
+
+
 export const postCarros = async (ctx: Context) => {
   const { request, response } = ctx;
   try {
