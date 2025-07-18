@@ -243,7 +243,7 @@ export const putCarros = async (ctx: RouterContext<"/carros/:id">) => {
         response.status = 200;
         response.body = {
           success: true,
-          message: "Carro agregado correctamente",
+          message: "Carro actualizado correctamente",
           data: resultado,
         };
         return;
@@ -251,7 +251,7 @@ export const putCarros = async (ctx: RouterContext<"/carros/:id">) => {
         response.status = 400;
         response.body = {
           success: false,
-          message: "Error al agregar el carro: " + resultado,
+          message: "Error al actualizar el carro: " + resultado,
         };
         return;
       }  
