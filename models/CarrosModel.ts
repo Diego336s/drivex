@@ -145,4 +145,57 @@ public async listarCarros(): Promise<CarroData[]> {
       };
     }
   }
+
+  public async actualizarCarro(): Promise<{
+    success: boolean;
+    message: string;
+    carro?: Record<string, unknown>;
+  }> {
+    try {
+      if (!this._objCarro || this._objCarro.id === null) {
+        throw new Error("No se proporciono informacion del carro");
+      }
+
+      const { id, marca, modelo, fecha } = this._objCarro;
+
+      if (!marca || !modelo || !fecha) {
+        throw new Error("Faltan datos requeridos para actualizar el carro");
+      }
+
+      await Conexion.execute("START TRANSACTION");
+
+      const resultado = await Conexion.execute(
+        "UPDATE carros SET marca = ?, modelo = ?, fecha = ? WHERE id = ?",
+        [marca, modelo, fecha, id],
+      );
+
+      if (resultado && typeof resultado.affectedRows === "number" && resultado.affectedRows > 0) {
+        const [carro] = await Conexion.query(
+          "SELECT * FROM carros WHERE id = ?",
+          [id],
+        );
+        await Conexion.execute("COMMIT");
+
+        return {
+          success: true,
+          message: "Carro actualizado correctamente",
+          carro: carro,
+        };
+      } else {
+        throw new Error("No se pudo actualizar el carro");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      } else {
+        return {
+          success: false,
+          message: "Error interno del servidor: " + String(error),
+        };
+      }
+    }
+  }
 }

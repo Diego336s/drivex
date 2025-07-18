@@ -12,7 +12,7 @@ const CarrosRouter = new Router();
 CarrosRouter.get("/carros", getCarros);
 CarrosRouter.get("/carros/:id", getCarroById);
 CarrosRouter.post("/carros", postCarros);
-CarrosRouter.put("/carros", putCarros);
+CarrosRouter.put("/carros/:id", putCarros);
 CarrosRouter.delete("/carros/:id", deleteCarro);
 
 export { CarrosRouter };
