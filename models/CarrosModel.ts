@@ -34,6 +34,20 @@ public async listarCarros(): Promise<CarroData[]> {
 }
 
 
+  public async ObtenerCarroPorId(id: number): Promise<Carro | null> {
+  try {
+    const result = await Conexion.execute("SELECT * FROM carros WHERE id = ?", [id]);
+
+    if (!result.rows || result.rows.length === 0) {
+      return null;
+    }
+
+    return result.rows[0] as Carro;
+  } catch (error) {
+    console.error("Error al obtener carro:", error);
+    return null;
+  }
+}
 
   
   public async agregarCarro(): Promise<{
