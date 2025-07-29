@@ -32,7 +32,7 @@ export class CarroSubidaMasiva {
         headers.forEach((key: string, i: number) => {
           obj[key] = fila[i];
         });
-
+        
         const carro = new Carro({
           id: null,
           marca: obj.marca,

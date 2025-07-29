@@ -34,7 +34,6 @@ export const getCarros = async (ctx: Context) => {
   }
 };
 
-
 export const getCarroById = async (ctx: RouterContext<"/carros/:id">) => {
   const id = Number(ctx.params.id);
 
@@ -75,8 +74,6 @@ export const getCarroById = async (ctx: RouterContext<"/carros/:id">) => {
     };
   }
 };
-
-
 
 export const postCarros = async (ctx: Context) => {
   const { request, response } = ctx;
@@ -153,22 +150,20 @@ export const postCarros = async (ctx: Context) => {
       const subida = new CarroSubidaMasiva(data as any[][]);
       await subida.agregarMasivamente();
 
-      if(subida){
- response.status = 200;
-      response.body = {
-        success: true,
-        message: "Carros agregados correctamente desde el archivo Excel",
-      };
-      return;
-      }else{
+      if (subida) {
+        response.status = 200;
+        response.body = {
+          success: true,
+          message: "Carros agregados correctamente desde el archivo Excel",
+        };
+        return;
+      } else {
         response.status = 400;
-        response.body ={
+        response.body = {
           success: false,
           message: "Error al agregar los carros desde el archivo Excel",
-           
-        }
+        };
       }
-     
     } else {
       response.status = 400;
       response.body = {
@@ -207,7 +202,7 @@ export const putCarros = async (ctx: RouterContext<"/carros/:id">) => {
       return;
     }
 
-    if(!params.id){
+    if (!params.id) {
       response.status = 400;
       response.body = {
         success: false,
@@ -218,46 +213,40 @@ export const putCarros = async (ctx: RouterContext<"/carros/:id">) => {
 
     const body = await request.body.formData();
 
-    
+    const marca = body.get("marca") as string;
+    const modelo = body.get("modelo") as string;
+    const fecha = body.get("fecha") as string;
 
-      
-      const marca = body.get("marca") as string;
-      const modelo = body.get("modelo") as string;
-      const fecha = body.get("fecha") as string;
+    const validacion = CarrosSchema.parse({
+      marca,
+      modelo,
+    });
 
-      const validacion = CarrosSchema.parse({
-        marca,
-        modelo,
-      });
+    const datos_a_enviar = {
+      id: Number(params.id),
+      ...validacion,
+      fecha: Number(fecha),
+    };
 
-      const datos_a_enviar = {
-        id:   Number(params.id),
-        ...validacion,
-        fecha: Number(fecha),
+    const objCarro = new Carro(datos_a_enviar);
+    const resultado = await objCarro.actualizarCarro();
+
+    if (resultado) {
+      response.status = 200;
+      response.body = {
+        success: true,
+        message: "Carro actualizado correctamente",
+        data: resultado,
       };
-
-      const objCarro = new Carro(datos_a_enviar);
-      const resultado = await objCarro.actualizarCarro();
-
-      if (resultado) {
-        response.status = 200;
-        response.body = {
-          success: true,
-          message: "Carro actualizado correctamente",
-          data: resultado,
-        };
-        return;
-      } else {
-        response.status = 400;
-        response.body = {
-          success: false,
-          message: "Error al actualizar el carro: " + resultado,
-        };
-        return;
-      }  
-
-    
-  
+      return;
+    } else {
+      response.status = 400;
+      response.body = {
+        success: false,
+        message: "Error al actualizar el carro: " + resultado,
+      };
+      return;
+    }
   } catch (error) {
     if (error instanceof z.ZodError) {
       response.status = 500;
